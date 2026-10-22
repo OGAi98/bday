@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Happy Birthday!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500&display=swap">
+<style>
+/* Layout: one white boarding pass centered on a pale ground; split-flap lettering for the headline and sender; stub with a barcode unique to each message. */
+:root {
+  --ground: #F3F4F6;
+  --paper: #FFFFFF;
+  --ink: #15171C;
+  --muted: #8A8F98;
+  --hair: #E4E6EA;
+  --accent: #2B55D9;
+  --display: "Familjen Grotesk", "Hiragino Sans", system-ui, sans-serif;
+  --body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --ease: cubic-bezier(.2,.7,.2,1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.wrap {
+  max-width: 820px; margin: 0 auto; padding-block: clamp(28px, 7vh, 72px) 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px;
+}
+
+/* Header */
+.eyebrow { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.eyebrow .live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: 1px; }
+h1 { margin: 6px 0 0; font-family: var(--display); font-weight: 700; font-size: clamp(34px, 8vw, 68px); line-height: 1; letter-spacing: -.02em; }
+.flap span { display: inline; }
+.flap span.tick { color: var(--accent); }
+
+/* Ticket */
+.ticket {
+  position: relative; display: grid; grid-template-columns: 1fr 168px;
+  background: var(--paper); border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(21,23,28,.04), 0 12px 40px -12px rgba(21,23,28,.14);
+  cursor: pointer; user-select: none; touch-action: pan-y; outline: none;
+  transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+}
+.ticket:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(21,23,28,.04), 0 18px 48px -14px rgba(21,23,28,.18); }
+.ticket:focus-visible { box-shadow: 0 0 0 2px var(--accent), 0 12px 40px -12px rgba(21,23,28,.14); }
+.notch { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: var(--ground); }
+.notch.a { top: -11px; right: 157px; }
+.notch.b { bottom: -11px; right: 157px; }
+.perf { position: absolute; top: 16px; bottom: 16px; right: 167px; border-left: 1.5px dashed var(--hair); }
+
+.main { padding: 28px 32px; display: grid; gap: 26px; min-width: 0; }
+.route { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 16px; }
+.route .to { text-align: right; }
+label, .k { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.v-big { font-family: var(--display); font-weight: 600; font-size: clamp(22px, 4.2vw, 32px); line-height: 1.1; letter-spacing: -.01em; overflow-wrap: break-word; min-width: 0; }
+.plane { color: var(--accent); padding-bottom: 6px; }
+.plane svg { display: block; width: 26px; height: 26px; }
+
+.msg { min-height: 7.5em; display: flex; align-items: center; }
+.msg p { margin: 0; font-size: clamp(17px, 2.6vw, 21px); line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 46ch; }
+
+.meta { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 8px 36px; padding-top: 18px; border-top: 1px solid var(--hair); }
+.meta .v { font-family: var(--mono); font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+
+.stub { padding: 28px 22px; display: grid; grid-template-rows: auto auto 1fr; gap: 18px; min-width: 0; }
+.stub .seat { font-family: var(--display); font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: -.02em; }
+.stub .mini { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+.barcode { align-self: end; width: 100%; height: 64px; display: block; }
+.barcode rect { fill: var(--ink); }
+
+/* Swap animation */
+.swap { transition: opacity .32s var(--ease), transform .42s var(--ease), filter .32s var(--ease); }
+.ticket.leaving .swap { opacity: 0; transform: translateY(-8px); filter: blur(2px); }
+.ticket.entering .swap { opacity: 0; transform: translateY(10px); }
+
+/* Controls */
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.progress { display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { width: 120px; height: 2px; background: var(--hair); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .5s var(--ease); }
+.btns { display: flex; gap: 8px; }
+button {
+  font: inherit; font-family: var(--display); font-weight: 600; font-size: 15px; cursor: pointer;
+  border-radius: 999px; padding: 11px 22px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper);
+  transition: transform .2s var(--ease), background .2s, color .2s;
+}
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button.ghost { background: transparent; color: var(--ink); border-color: var(--hair); }
+button.ghost:hover { border-color: var(--ink); }
+button:disabled { opacity: .35; cursor: default; transform: none; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.hint { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; margin: 0; }
+
+/* All messages */
+.all { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.all article { background: var(--paper); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px; align-content: start; min-width: 0;
+  box-shadow: 0 1px 2px rgba(21,23,28,.04); }
+.all p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.all .who { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.notice { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }
+
+@media (max-width: 600px) {
+  .ticket { grid-template-columns: 1fr; }
+  .notch.a { top: auto; right: auto; left: -11px; bottom: 159px; }
+  .notch.b { bottom: 159px; right: -11px; }
+  .perf { top: auto; bottom: 169px; left: 18px; right: 18px; border-left: 0; border-top: 1.5px dashed var(--hair); }
+  .main { padding: 24px 22px; gap: 22px; }
+  .route { grid-template-columns: auto 1fr; align-items: center; row-gap: 10px; }
+  .route > div:first-child { grid-column: 1 / -1; }
+  .plane { padding-bottom: 0; }
+  .stub { height: 170px; padding: 22px; row-gap: 14px; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr; column-gap: 24px; }
+  .stub > div:nth-child(1) { grid-row: 1; }
+  .stub > div:nth-child(2) { grid-row: 1; }
+  .barcode { grid-column: 1 / -1; height: 44px; }
+  .meta { grid-template-columns: repeat(3, auto); gap: 8px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .swap, .ticket, button, .bar i { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow"><span class="live" id="status">Now boarding</span><span id="today"></span></div>
+    <h1 id="title" class="flap" aria-label="Happy Birthday!"></h1>
+  </header>
+
+  <article class="ticket" id="ticket" tabindex="0" role="button" aria-label="Show another message">
+    <span class="notch a"></span><span class="notch b"></span><span class="perf"></span>
+    <div class="main">
+      <div class="route swap">
+        <div><span class="k">From</span><div class="v-big flap" id="from">&nbsp;</div></div>
+        <div class="plane" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M2.5 13.5l7-1.6L14 4.2c.4-.6 1.3-.7 1.7-.1l.2.3-2.3 7.4 5.2-1.2c1-.2 1.9.5 1.9 1.4s-.9 1.6-1.9 1.4l-5.2-1.2 2.3 7.4-.2.3c-.4.6-1.3.5-1.7-.1L9.5 13.7l-7-1.6z" fill="currentColor"/></svg>
+        </div>
+        <div class="to"><span class="k">To</span><div class="v-big" id="to">You</div></div>
+      </div>
+      <div class="msg swap"><p id="message">Loading messages…</p></div>
+      <div class="meta swap">
+        <div><span class="k">Date</span><span class="v" id="date">--</span></div>
+        <div><span class="k">Pass</span><span class="v" id="no">--/--</span></div>
+        <div><span class="k">Class</span><span class="v">Friendship</span></div>
+      </div>
+    </div>
+    <div class="stub swap" aria-hidden="true">
+      <div><span class="k">Seat</span><div class="seat" id="seat">--</div></div>
+      <div><span class="k">Gate</span><div class="mini">Anywhere</div></div>
+      <svg class="barcode" id="barcode" viewBox="0 0 120 64" preserveAspectRatio="none"></svg>
+    </div>
+  </article>
+
+  <div class="controls">
+    <div class="progress"><span id="count">00 / 00</span><span class="bar"><i id="bar"></i></span></div>
+    <div class="btns">
+      <button type="button" class="ghost" id="toggleAll" aria-expanded="false">All messages</button>
+      <button type="button" id="next">Next</button>
+    </div>
+  </div>
+  <p class="hint">Tap or swipe the pass for the next message</p>
+
+  <section class="all" id="all" hidden></section>
+  <p class="notice" id="notice"></p>
+</div>
+
+<script>
+/* ===== Settings: edit these two lines ===== */
+const CSV_URL = "";           // Google Sheets: File > Share > Publish to web > CSV. Paste the URL here.
+const FRIEND_NAME = "";       // e.g. "Mike" -> header reads "Happy Birthday, Mike!"
+/* ========================================== */
+
+const $ = (id) => document.getElementById(id);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const now = new Date();
+const stamp = String(now.getDate()).padStart(2, "0") + " " + MONTHS[now.getMonth()] + " " + now.getFullYear();
+$("today").textContent = stamp; $("date").textContent = stamp.slice(0, 6);
+if (FRIEND_NAME) $("to").textContent = FRIEND_NAME;
+
+const SAMPLE = [
+  { name: "Example: Kenta", text: "Happy birthday! See you in Tokyo soon. (This is a sample card.)" },
+  { name: "Example: Mei", text: "生日快樂! Next time in Taipei, dinner is on me. (Sample)" },
+  { name: "Example: Jisoo", text: "생일 축하해! Safe travels this year. (Sample)" }
+];
+
+/* Split-flap text: each character cycles through letters, then locks in from left to right. */
+const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+function flap(el, text) {
+  const chars = Array.from(text);
+  el.replaceChildren(...chars.map(() => document.createElement("span")));
+  const spans = Array.from(el.children);
+  if (reduce) { spans.forEach((s, i) => s.textContent = chars[i] === " " ? " " : chars[i]); return; }
+  const start = performance.now(), per = 38, spin = 260;
+  (function frame(t) {
+    let done = true;
+    spans.forEach((s, i) => {
+      const c = chars[i];
+      if (c === " ") { s.textContent = " "; return; }
+      const lock = spin + i * per;
+      if (t - start >= lock) { s.textContent = c; s.classList.remove("tick"); }
+      else { done = false; s.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0]; s.classList.add("tick"); }
+    });
+    if (!done) requestAnimationFrame(frame);
+  })(start);
+}
+
+function parseCSV(str) {
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (q) {
+      if (c === '"') { if (str[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (c !== "\r") cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+function toMessages(rows) {
+  if (!rows.length) return [];
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const find = (...keys) => head.findIndex(h => keys.some(k => h.includes(k)));
+  let ni = find("名前", "name", "お名前");
+  let mi = find("メッセージ", "message", "記入", "ひとこと", "コメント");
+  const oki = head.findIndex(h => h === "ok" || h === "表示" || h === "approve");
+  if (ni < 0) ni = 1;
+  if (mi < 0) mi = head.length > 2 ? 2 : head.length - 1;
+  return rows.slice(1)
+    .filter(r => (r[mi] || "").trim())
+    .filter(r => oki < 0 || /^(ok|yes|true|1|o|○|✓)$/i.test((r[oki] || "").trim()))
+    .map(r => ({ name: (r[ni] || "").trim() || "A friend", text: r[mi].trim() }));
+}
+
+/* Deterministic barcode and seat from the message itself. */
+function hash(s) { let h = 2166136261; for (const ch of s) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function barcode(seed) {
+  const svg = $("barcode"); svg.replaceChildren();
+  let x = 0, h = seed || 1;
+  while (x < 120) {
+    h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+    const w = 1 + (h % 3), gap = 1 + ((h >>> 4) % 3);
+    if (x + w > 120) break;
+    const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    r.setAttribute("x", x); r.setAttribute("y", 0); r.setAttribute("width", w); r.setAttribute("height", 64);
+    svg.append(r); x += w + gap;
+  }
+}
+function seatFor(seed) { return (2 + seed % 38) + "ABCDEFGHJK"[(seed >>> 6) % 10]; }
+
+let msgs = [], bag = [], last = -1, seen = new Set(), busy = false;
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function paint(i) {
+  const m = msgs[i], seed = hash(m.name + "|" + m.text);
+  flap($("from"), m.name);
+  $("message").textContent = m.text;
+  $("seat").textContent = seatFor(seed);
+  $("no").textContent = String(i + 1).padStart(2, "0") + "/" + String(msgs.length).padStart(2, "0");
+  barcode(seed);
+  seen.add(i);
+  $("count").textContent = String(seen.size).padStart(2, "0") + " / " + String(msgs.length).padStart(2, "0");
+  $("bar").style.width = (seen.size / msgs.length * 100) + "%";
+}
+
+function next() {
+  if (!msgs.length || busy) return;
+  if (!bag.length) { bag = shuffle(msgs.map((_, i) => i)); if (bag.length > 1 && bag[bag.length - 1] === last) bag.unshift(bag.pop()); }
+  const i = bag.pop(); last = i;
+  const t = $("ticket");
+  if (reduce) { paint(i); return; }
+  busy = true;
+  t.classList.add("leaving");
+  setTimeout(() => {
+    t.classList.remove("leaving"); t.classList.add("entering"); paint(i);
+    requestAnimationFrame(() => requestAnimationFrame(() => { t.classList.remove("entering"); busy = false; }));
+  }, 300);
+}
+
+function renderAll() {
+  const g = $("all"); g.replaceChildren();
+  for (const m of msgs) {
+    const el = document.createElement("article");
+    const p = document.createElement("p"); p.textContent = m.text;
+    const w = document.createElement("span"); w.className = "who"; w.textContent = "From " + m.name;
+    el.append(p, w); g.append(el);
+  }
+}
+
+async function load() {
+  flap($("title"), FRIEND_NAME ? "Happy Birthday, " + FRIEND_NAME + "!" : "Happy Birthday!");
+  if (FRIEND_NAME) { document.title = "Happy Birthday, " + FRIEND_NAME + "!"; $("title").setAttribute("aria-label", document.title); }
+  let list = [], live = false;
+  if (CSV_URL) {
+    try {
+      const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(res.status);
+      list = toMessages(parseCSV(await res.text())); live = true;
+    } catch (e) {
+      $("notice").textContent = "Couldn't load the messages right now. Please reload the page in a moment.";
+    }
+  }
+  if (!live) { list = SAMPLE; if (!CSV_URL) $("notice").textContent = "Showing sample cards. Add the CSV link in the settings to show real messages."; }
+  if (live && !list.length) {
+    $("message").textContent = "No messages yet. Check back soon!";
+    $("next").disabled = true; $("toggleAll").disabled = true; $("status").textContent = "Waiting for messages"; return;
+  }
+  msgs = list;
+  $("status").textContent = msgs.length + (msgs.length === 1 ? " message on board" : " messages on board");
+  renderAll(); next();
+}
+
+$("next").addEventListener("click", next);
+let sx = null, swiped = false;
+$("ticket").addEventListener("pointerdown", (e) => { sx = e.clientX; swiped = false; });
+$("ticket").addEventListener("pointerup", (e) => { if (sx !== null && Math.abs(e.clientX - sx) > 50) { swiped = true; next(); } sx = null; });
+$("ticket").addEventListener("click", () => { if (swiped) { swiped = false; return; } next(); });
+$("ticket").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); next(); } });
+document.addEventListener("keydown", (e) => { if (e.key === "ArrowRight" && e.target === document.body) next(); });
+$("toggleAll").addEventListener("click", () => {
+  const g = $("all"); g.hidden = !g.hidden;
+  $("toggleAll").setAttribute("aria-expanded", String(!g.hidden));
+  $("toggleAll").textContent = g.hidden ? "All messages" : "Hide all";
+});
+load();
+</script>
+</body>
+</html>
